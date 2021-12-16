@@ -1,0 +1,71 @@
+<?php
+use Drupal\node\Entity\Node;
+// use Drupal\group\Entity\Group
+// use Civi\Api4\Event
+
+function booked_events_civicrm_config(&$config) {
+  // trying to prevent adding the same Listener multiple times.
+  if (isset(Civi::$statics[__FUNCTION__])) { return; }
+  Civi::$statics[__FUNCTION__] = 1;
+
+  Civi::dispatcher()->addListener('hook_civicrm_postCommit', 'booked_events_new_event');
+}
+
+// Event Creation triggers this 4x, but only one is the create Event.
+// $event is saved post hook.
+function booked_events_new_event($event) {
+  if($event->action != 'create' || $event->entity != 'Event') {
+    return;
+  }
+  
+  // Gather CiviCRM Event data.
+  $civicrm_event = $event->object;
+  $id = $civicrm_event->id;
+  $title = $civicrm_event->title;
+
+  $civiUrl = \Drupal\Core\Url::fromUri('base:/civicrm/event/register');
+  $civiUrl->setOption('query', [
+    'id' => $id,
+    'reset' => '1'
+  ]);
+  $civiLink = \Drupal\Core\Link::fromTextAndUrl(t('Booking Information'), $civiUrl)->toString();
+
+  $description = [
+    'summary' => '',
+    'value' => $civicrm_event->description . $civiLink,
+    'format' => '1'
+  ];
+
+  $date = strtotime($civicrm_event->start_date);
+  date_default_timezone_set('UTC');
+  $drupaldate = date('Y-m-d\TH:i:s', $date);
+  $formatteddate = date('l j F Y g:i A', $date);
+  $intro = $civicrm_event->intro_text . "
+<p>When: " . $formatteddate . "</p>";
+  $civicrm_event->intro_text = $intro;
+
+  // Create the drupal event node and save it.
+  $node_event = Node::create([
+    'type' => 'event',
+    'title' => $title,
+    'body' => $description,
+    'langcode' => 'und',
+    'uid' => '1',
+    'status' => 1,
+    'field_eventdate' => ['value' => $drupaldate],
+  ]);
+  $node_event->save();
+
+  $nodeId = $node_event->id();
+
+  // create a link that goes to the event node.
+  $drupalLink = \Drupal\Core\Link::fromTextAndUrl(t('Back to the event listing'), \Drupal\Core\Url::fromUri('base:/node/' . $nodeId))->toString();
+  $civicrm_event->summary = $drupalLink;
+  $civicrm_event->thankyou_footer_text = $drupalLink;
+  $civicrm_event->footer_text = $drupalLink;
+
+  // Load up group Bookable Events (142) and connect the event node to it.
+  // Warning: The exact id may change during migration and require updating.
+  $group = \Drupal\group\Entity\Group::load(142);
+  $group->addContent($node_event, 'group_node:event');
+}
