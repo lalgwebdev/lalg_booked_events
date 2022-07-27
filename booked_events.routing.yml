@@ -1,0 +1,7 @@
+booked_events.form:
+  path: '/admin/config/civicrm/booked_events'
+  defaults:
+    _form: '\Drupal\booked_events\Form\BookedEventsForm'
+    _title: 'Booked Events Settings'
+  requirements:
+    _permission: 'administer site configuration'
