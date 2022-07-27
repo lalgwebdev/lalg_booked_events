@@ -1,0 +1,5 @@
+booked_events.form:
+  title: 'Booked Events Settings'
+  description: 'Configure settings for the Booked Events module.'
+  route_name: booked_events.form
+  parent: 'civicrm.admin_config_civicrm'
