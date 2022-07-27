@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * @file
+ * Installation functions for Booked Events module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function booked_events_install() {
+  // Provide a default group, however this will go wrong due to differences in group structure.
+  $groupid = array(array("target_id" => 142));
+  $config = $this->config('booked_events.settings');
+  $config->set('booked_events.group', $groupid);
+  $config->save();
+}
