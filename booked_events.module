@@ -1,5 +1,5 @@
 <?php
-use Drupal\node\Entity\Node;
+use Drupal\recurring_events\Entity\EventSeries;
 
 function booked_events_civicrm_config(&$config) {
   // trying to prevent adding the same Listener multiple times.
@@ -42,22 +42,25 @@ function booked_events_new_event($event) {
 <p>When: " . $formatteddate . "</p>";
   $civicrm_event->intro_text = $intro;
 
-  // Create the drupal event node and save it.
-  $node_event = Node::create([
-    'type' => 'event',
+  // Create the drupal event and save it.
+  $recurring_event = EventSeries::create([
+    'type' => 'lalg_event',
+    'recur_type' => 'custom',
     'title' => $title,
-    'body' => $description,
     'langcode' => 'und',
     'uid' => '1',
     'status' => 1,
-    'field_eventdate' => ['value' => $drupaldate],
+    'field_series_title' => $title,
+    'field_series_description' => $description,
+    'custom_date' => ['value' => $drupaldate, 'end_value' => $drupaldate],
   ]);
-  $node_event->save();
+  $recurring_event->save();
 
-  $nodeId = $node_event->id();
+  $instances = array_keys($recurring_event->get('event_instances')->getValue());
+  $eventId = $instances[0]; // Needs instance id rather than series id.
 
   // create a link that goes to the event node.
-  $drupalLink = \Drupal\Core\Link::fromTextAndUrl(t('Back to the event listing'), \Drupal\Core\Url::fromUri('base:/node/' . $nodeId))->toString();
+  $drupalLink = \Drupal\Core\Link::fromTextAndUrl(t('Back to the event listing'), \Drupal\Core\Url::fromUri('base:/events/' . $eventId))->toString();
   $civicrm_event->summary = $drupalLink;
   $civicrm_event->thankyou_footer_text = $drupalLink;
   $civicrm_event->footer_text = $drupalLink;
@@ -65,9 +68,11 @@ function booked_events_new_event($event) {
   // Load up group Bookable Events (142) and connect the event node to it.
   $config = \Drupal::config('booked_events.settings');
     
+  $plugin_manager = \Drupal::service('plugin.manager.group_content_enabler');
+  
   $groupid = $config->get('booked_events.group');
   foreach($groupid as $key=>$value) {
     $group = \Drupal\group\Entity\Group::load($value["target_id"]);
-    $group->addContent($node_event, 'group_node:event');
+    $group->addContent($recurring_event, 'group_recurring_events_series:lalg_event');
   }
 }
