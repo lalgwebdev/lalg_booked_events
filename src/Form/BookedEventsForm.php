@@ -22,8 +22,10 @@ class BookedEventsForm extends ConfigFormBase {
     
     $groupid = $config->get('booked_events.group');
     $group = array();
-    foreach($groupid as $key=>$value) {
-      $group[] = \Drupal\group\Entity\Group::load($value["target_id"]);
+    if($groupid != null) {
+      foreach($groupid as $key=>$value) {
+        $group[] = \Drupal\group\Entity\Group::load($value["target_id"]);
+      }
     }
     // group field.
     $form['group'] = [
