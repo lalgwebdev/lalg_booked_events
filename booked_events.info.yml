@@ -5,5 +5,5 @@ type: module
 core_version_requirement: ^8.8 || ^9
 dependencies:
  - civicrm
-version: "0.1.0"
+version: "0.1.1"
 configure: booked_events.form
