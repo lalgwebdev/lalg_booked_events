@@ -47,7 +47,7 @@ function booked_events_new_event($event) {
     'type' => 'lalg_event',
     'recur_type' => 'custom',
     'title' => $title,
-    'langcode' => 'und',
+    'langcode' => 'en',
     'uid' => '1',
     'status' => 1,
     'field_series_title' => $title,
@@ -56,8 +56,8 @@ function booked_events_new_event($event) {
   ]);
   $recurring_event->save();
 
-  $instances = array_keys($recurring_event->get('event_instances')->getValue());
-  $eventId = $instances[0]; // Needs instance id rather than series id.
+  $instances = $recurring_event->get('event_instances')->getValue();
+  $eventId = $instances[0]['target_id']; // Needs instance id rather than series id.
 
   // create a link that goes to the event node.
   $drupalLink = \Drupal\Core\Link::fromTextAndUrl(t('Back to the event listing'), \Drupal\Core\Url::fromUri('base:/events/' . $eventId))->toString();
