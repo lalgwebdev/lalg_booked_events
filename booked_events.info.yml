@@ -2,8 +2,8 @@ name: 'LALG Booked Events'
 description: 'Drupal integration support for CiviCRM Events'
 package: 'Custom'
 type: module
-core_version_requirement: ^8.8 || ^9
+core_version_requirement: ^9 || ^10
 dependencies:
  - civicrm
-version: "0.1.1"
+version: "0.2.0"
 configure: booked_events.form
