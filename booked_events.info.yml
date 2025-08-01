@@ -6,5 +6,6 @@ core_version_requirement: ^9 || ^10
 dependencies:
  - civicrm
  - group
+ - recurring_events
 version: "0.3.0"
 configure: booked_events.form
