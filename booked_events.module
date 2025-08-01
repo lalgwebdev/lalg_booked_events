@@ -68,11 +68,9 @@ function booked_events_new_event($event) {
   // Load up group Bookable Events (142) and connect the event node to it.
   $config = \Drupal::config('booked_events.settings');
     
-  $plugin_manager = \Drupal::service('plugin.manager.group_content_enabler');
-  
   $groupid = $config->get('booked_events.group');
   foreach($groupid as $key=>$value) {
     $group = \Drupal\group\Entity\Group::load($value["target_id"]);
-    $group->addContent($recurring_event, 'group_recurring_events_series:lalg_event');
+    $group->addRelationship($recurring_event, 'group_recurring_events_series:lalg_event');
   }
 }
